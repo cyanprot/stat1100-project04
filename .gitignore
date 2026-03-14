@@ -210,3 +210,4 @@ __marimo__/
 data/CMAPSSData/*.txt
 data/CMAPSSData/*.zip
 *.pdf
+!presentation/presentation.pdf
