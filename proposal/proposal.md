@@ -2,7 +2,7 @@
 
 **Course:** STAT 1100 — Introduction to Data Science
 **Instructor:** Vincent Yeung
-**Team Members:** Jongmin, Aedrian
+**Team Members:** Aedrian Formento, Jongmin Lee
 **Date:** March 14, 2026
 
 ---
