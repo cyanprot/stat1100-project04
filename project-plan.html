@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project 04 — Predictive Maintenance | STAT 1100</title>
+<style>
+@page { size: letter; margin: 0.6in; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.65;
+  color: #1f2937;
+  max-width: 7.2in;
+  margin: 0 auto;
+  padding: 0.5in;
+}
+
+/* ── Typography ─────────────────────────── */
+
+h1 {
+  font-size: 20pt;
+  font-weight: 700;
+  color: #111827;
+  border-bottom: 3px solid #2563eb;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  color: #6b7280;
+  font-size: 9.5pt;
+  margin-bottom: 20px;
+}
+
+h2 {
+  font-size: 13pt;
+  font-weight: 600;
+  color: #1e40af;
+  margin-top: 28px;
+  margin-bottom: 10px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #dbeafe;
+  page-break-after: avoid;
+}
+
+h3 {
+  font-size: 11pt;
+  font-weight: 600;
+  color: #374151;
+  margin-top: 16px;
+  margin-bottom: 6px;
+  page-break-after: avoid;
+}
+
+p { margin-bottom: 8px; }
+
+strong { color: #111827; }
+
+/* ── Links ──────────────────────────────── */
+
+a { color: #2563eb; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ─────────────────────────────── */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0 14px 0;
+  font-size: 9.5pt;
+  table-layout: fixed;
+  word-wrap: break-word;
+  break-inside: avoid;
+}
+
+th {
+  background: #eff6ff;
+  color: #1e40af;
+  padding: 6px 10px;
+  text-align: left;
+  font-size: 9pt;
+  font-weight: 600;
+  border-bottom: 2px solid #bfdbfe;
+}
+
+td {
+  padding: 5px 10px;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: top;
+}
+
+tr:nth-child(even) td { background: #f9fafb; }
+
+/* ── Option Cards ───────────────────────── */
+
+.option {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #2563eb;
+  padding: 12px 16px;
+  margin: 10px 0;
+  border-radius: 0 4px 4px 0;
+  break-inside: avoid;
+}
+
+.option.recommended {
+  border-left-color: #059669;
+  background: #f0fdf4;
+}
+
+.option h3 {
+  margin-top: 0;
+  font-size: 10.5pt;
+  color: #1e40af;
+}
+
+.option.recommended h3 { color: #059669; }
+
+.option pre {
+  background: #1e293b;
+  color: #e2e8f0;
+  font-size: 8.5pt;
+  padding: 8px 12px;
+  border-radius: 3px;
+  margin: 6px 0;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.pro-con {
+  font-size: 9pt;
+  margin-top: 6px;
+}
+
+.pro-con .pro { color: #059669; }
+.pro-con .con { color: #dc2626; }
+
+/* ── Code Blocks ────────────────────────── */
+
+pre {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 8.5pt;
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 10px 14px;
+  border-radius: 4px;
+  margin: 6px 0 10px 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1.5;
+  break-inside: avoid;
+}
+
+code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 9pt;
+  background: #f3f4f6;
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+pre code { background: none; padding: 0; }
+
+/* ── Callout Boxes ──────────────────────── */
+
+.note {
+  background: #eff6ff;
+  border-left: 3px solid #2563eb;
+  padding: 8px 14px;
+  margin: 8px 0;
+  font-size: 9.5pt;
+  border-radius: 0 3px 3px 0;
+  break-inside: avoid;
+}
+
+.warning {
+  background: #fef3c7;
+  border-left: 3px solid #f59e0b;
+  padding: 8px 14px;
+  margin: 8px 0;
+  font-size: 9.5pt;
+  border-radius: 0 3px 3px 0;
+  break-inside: avoid;
+}
+
+/* ── Checklist ──────────────────────────── */
+
+.checklist {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin: 8px 0;
+  break-inside: avoid;
+}
+
+.checklist li {
+  list-style: none;
+  margin-bottom: 4px;
+  padding-left: 4px;
+}
+
+.checklist li::before {
+  content: "☐ ";
+  color: #9ca3af;
+  font-size: 11pt;
+}
+
+/* ── Difficulty Badge ───────────────────── */
+
+.badge {
+  display: inline-block;
+  font-size: 7.5pt;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  text-transform: uppercase;
+}
+
+.badge.easy { background: #d1fae5; color: #065f46; }
+.badge.medium { background: #fef3c7; color: #92400e; }
+.badge.hard { background: #fee2e2; color: #991b1b; }
+
+/* ── Timeline ───────────────────────────── */
+
+.timeline-phase {
+  font-size: 8.5pt;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-top: 16px;
+  margin-bottom: 4px;
+}
+
+/* ── Repo Tree ──────────────────────────── */
+
+.tree {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5pt;
+  line-height: 1.6;
+  color: #374151;
+  break-inside: avoid;
+}
+
+.tree .comment { color: #9ca3af; }
+
+/* ── Footer ─────────────────────────────── */
+
+.footer {
+  margin-top: 30px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 9pt;
+  color: #9ca3af;
+  font-style: italic;
+  text-align: center;
+}
+
+/* ── Utility ────────────────────────────── */
+
+ul, ol { margin-left: 18px; margin-bottom: 8px; }
+li { margin-bottom: 3px; }
+.page-break { page-break-before: always; }
+hr { border: none; border-top: 1px solid #e5e7eb; margin: 20px 0; }
+
+/* ── Print ──────────────────────────────── */
+
+@media print {
+  body { padding: 0; }
+  .option, .checklist, .tree, .note, .warning { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<h1>Project 04 — Predictive Maintenance</h1>
+<p class="subtitle">STAT 1100 · Langara College · Spring 2026 · Last updated: March 14, 2026</p>
+
+<!-- ════════════════════════════════════════ -->
+<h2>1. Project Overview</h2>
+
+<p>A manufacturing company experiences costly unplanned equipment failures that halt production. Our goal is to build a predictive maintenance system that shifts from scheduled maintenance to <strong>condition-based intervention</strong> — predicting when an engine will fail before it actually does.</p>
+
+<h3>Dataset: NASA CMAPSS</h3>
+
+<p>We're using the <strong>NASA Turbofan Engine Degradation Simulation Dataset (CMAPSS)</strong>:</p>
+
+<ul>
+  <li>~20,000 rows across 100 engine units</li>
+  <li>Each engine runs from healthy state to failure (run-to-failure time series)</li>
+  <li>21 sensor readings + 3 operating condition settings per time step</li>
+  <li>Our job: predict <strong>Remaining Useful Life (RUL)</strong> — how many cycles until failure</li>
+</ul>
+
+<p>This dataset is publicly available and widely used in predictive maintenance research. It maps perfectly to all 10 required project tasks.</p>
+
+<!-- ════════════════════════════════════════ -->
+<h2>2. Team</h2>
+
+<table>
+  <tr>
+    <th style="width: 25%;"></th>
+    <th style="width: 37.5%;">Jongmin</th>
+    <th style="width: 37.5%;">Aedrian</th>
+  </tr>
+  <tr>
+    <td><strong>Strengths</strong></td>
+    <td>Python, data science workflow, AI tooling</td>
+    <td>Computer Science, English (native), presentation</td>
+  </tr>
+  <tr>
+    <td><strong>Program</strong></td>
+    <td>Bioinformatics</td>
+    <td>Computer Science</td>
+  </tr>
+  <tr>
+    <td><strong>Contact</strong></td>
+    <td colspan="2">WhatsApp (existing group chat)</td>
+  </tr>
+</table>
+
+<!-- ════════════════════════════════════════ -->
+<h2>3. Deliverables &amp; Grading</h2>
+
+<h3>What we submit</h3>
+
+<table>
+  <tr>
+    <th style="width: 22%;">Deliverable</th>
+    <th style="width: 10%;">Weight</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><strong>Written Report</strong></td>
+    <td>30%</td>
+    <td>Windowing strategy, RUL label design, sensor normalisation decisions, model justifications</td>
+  </tr>
+  <tr>
+    <td><strong>Notebook</strong></td>
+    <td>50%</td>
+    <td>End-to-end reproducible pipeline: raw data → final model predictions</td>
+  </tr>
+  <tr>
+    <td><strong>Presentation</strong></td>
+    <td>20%</td>
+    <td>Translate model findings into maintenance intervention recommendations for plant management</td>
+  </tr>
+</table>
+
+<h3>Group Project grade breakdown (20% of course total)</h3>
+
+<table>
+  <tr>
+    <th style="width: 22%;">Component</th>
+    <th style="width: 10%;">Weight</th>
+    <th>What it means</th>
+  </tr>
+  <tr>
+    <td>Proposal</td>
+    <td>5%</td>
+    <td>Project selection + initial plan</td>
+  </tr>
+  <tr>
+    <td>Team Work</td>
+    <td>10%</td>
+    <td>Ongoing collaboration evidence (commits, discussions, shared work)</td>
+  </tr>
+  <tr>
+    <td>Peer Review</td>
+    <td>5%</td>
+    <td>Each member evaluates the other's contribution</td>
+  </tr>
+  <tr>
+    <td>Final Report</td>
+    <td>10%</td>
+    <td>Quality of final deliverables</td>
+  </tr>
+</table>
+
+<div class="warning">
+  <strong>Note on Peer Review:</strong> The instructor expects contributions to be balanced across all areas. We should both be involved in every phase — not just "one person codes, one person writes."
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<div class="page-break"></div>
+<h2>4. Work Approach — Let's Discuss</h2>
+
+<p>Here are three approaches we can take. Each has trade-offs. <strong>Let's pick the one that works best for both of us</strong>, or mix and match ideas.</p>
+
+<div class="option">
+  <h3>Option A: Sprint &amp; Review</h3>
+  <p>One person builds the core notebook first, then the other reviews it thoroughly and writes the report.</p>
+<pre>Week 1 (Mar 14-17):  Person 1 builds notebook (Data Prep + Modeling)
+Week 1 (Mar 17-21):  Person 2 writes report based on notebook, Person 1 reviews
+Week 2 (Mar 22-30):  Both work on presentation
+Mar 31:              Present</pre>
+  <div class="pro-con">
+    <p><span class="pro"><strong>Pro:</strong></span> Fast. Uses each person's strongest skills efficiently.</p>
+    <p><span class="con"><strong>Con:</strong></span> Less balanced. Risk of one person doing most of the coding.</p>
+  </div>
+</div>
+
+<div class="option">
+  <h3>Option B: Parallel Tracks</h3>
+  <p>Split by deliverable from the start and work simultaneously.</p>
+<pre>Person 1:  Notebook (Data Prep + Model Building) — owns the .ipynb
+Person 2:  Report (research + justification) + Presentation — owns the docs
+Both:      Daily sync on WhatsApp</pre>
+  <div class="pro-con">
+    <p><span class="pro"><strong>Pro:</strong></span> No blocking. Clear ownership of deliverables.</p>
+    <p><span class="con"><strong>Con:</strong></span> Less overlap in skills. Peer review might flag uneven coding contribution.</p>
+  </div>
+</div>
+
+<div class="option">
+  <h3>Option C: Teach &amp; Build (Pair Programming)</h3>
+  <p>Work on everything together in real-time. One person codes while the other writes justification in the same notebook.</p>
+<pre>Daily 1-2 hour Google Colab sessions together
+Coder:   writes Python cells
+Writer:  writes markdown cells explaining decisions
+Both:    commit to GitHub</pre>
+  <div class="pro-con">
+    <p><span class="pro"><strong>Pro:</strong></span> Most balanced. Both learn everything. Peer review safe.</p>
+    <p><span class="con"><strong>Con:</strong></span> Requires synced schedules. Slower overall pace.</p>
+  </div>
+</div>
+
+<div class="option recommended">
+  <h3>Recommended: Hybrid Approach</h3>
+  <p>A combination will probably work best:</p>
+  <ol>
+    <li><strong>Start together</strong> (Option C style) for the first session — align on the dataset and approach</li>
+    <li><strong>Split into focused tracks</strong> (Option A/B) for speed during the middle phase</li>
+    <li><strong>Regroup for review</strong> before submission — both review everything</li>
+  </ol>
+  <p><strong>What do you think? Open to other ideas too.</strong></p>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2>5. Timeline</h2>
+
+<p class="timeline-phase">Phase 1: Core Work (Mar 14–21)</p>
+<p>Goal: finish notebook + report draft before midterms.</p>
+
+<table>
+  <tr>
+    <th style="width: 18%;">Date</th>
+    <th style="width: 55%;">Milestone</th>
+    <th>Who</th>
+  </tr>
+  <tr>
+    <td><strong>Mar 14 (Sat)</strong></td>
+    <td>Download CMAPSS dataset, initial EDA, understand data structure</td>
+    <td>Both</td>
+  </tr>
+  <tr>
+    <td><strong>Mar 15 (Sun)</strong></td>
+    <td>Data Prep tasks 1–3: windowing, feature engineering, RUL labels</td>
+    <td>TBD</td>
+  </tr>
+  <tr>
+    <td><strong>Mar 16 (Mon)</strong></td>
+    <td>Data Prep tasks 4–5: normalisation, train/test split</td>
+    <td>TBD</td>
+  </tr>
+  <tr>
+    <td><strong>Mar 17 (Tue)</strong></td>
+    <td>Model Building tasks 1–2: regression + classification baselines</td>
+    <td>TBD</td>
+  </tr>
+  <tr>
+    <td><strong>Mar 18 (Wed)</strong></td>
+    <td>Model Building tasks 3–5: advanced model, sensor importance, alarm threshold</td>
+    <td>TBD</td>
+  </tr>
+  <tr>
+    <td><strong>Mar 19 (Thu)</strong></td>
+    <td>Report draft — all justifications written</td>
+    <td>TBD</td>
+  </tr>
+  <tr>
+    <td><strong>Mar 20 (Fri)</strong></td>
+    <td>Review + polish notebook and report</td>
+    <td>Both</td>
+  </tr>
+  <tr>
+    <td><strong>Mar 21 (Sat)</strong></td>
+    <td>Final check, submit if deadline applies</td>
+    <td>Both</td>
+  </tr>
+</table>
+
+<div class="note">
+  <strong>TBD</strong> = we'll assign based on the approach we choose together.
+</div>
+
+<p class="timeline-phase">Phase 2: Presentation (Mar 22–30)</p>
+
+<table>
+  <tr>
+    <th style="width: 18%;">Date</th>
+    <th style="width: 55%;">Milestone</th>
+    <th>Who</th>
+  </tr>
+  <tr>
+    <td><strong>Mar 22–25</strong></td>
+    <td>Midterms / break</td>
+    <td>—</td>
+  </tr>
+  <tr>
+    <td><strong>Mar 26–29</strong></td>
+    <td>Build presentation slides (Google Slides)</td>
+    <td>Both</td>
+  </tr>
+  <tr>
+    <td><strong>Mar 30</strong></td>
+    <td>Rehearse presentation</td>
+    <td>Both</td>
+  </tr>
+  <tr>
+    <td><strong>Mar 31</strong></td>
+    <td>Present in class</td>
+    <td>Both</td>
+  </tr>
+</table>
+
+<!-- ════════════════════════════════════════ -->
+<div class="page-break"></div>
+<h2>6. Task Breakdown</h2>
+
+<p>These are the 10 required tasks from the project specification. Every task must be completed.</p>
+
+<h3>Data Preparation (5 tasks)</h3>
+
+<table>
+  <tr>
+    <th style="width: 5%;">#</th>
+    <th style="width: 22%;">Task</th>
+    <th>What we need to do</th>
+    <th style="width: 14%;">Difficulty</th>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td><strong>Time-series windowing</strong></td>
+    <td>Segment each engine's sensor history into fixed-length windows for model input</td>
+    <td><span class="badge medium">Medium</span></td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td><strong>Sensor feature engineering</strong></td>
+    <td>Create rolling statistics (mean, std, slope) from raw sensor readings</td>
+    <td><span class="badge medium">Medium</span></td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td><strong>RUL label construction</strong></td>
+    <td>Calculate remaining cycles until failure for each time step; decide on piecewise-linear vs raw RUL</td>
+    <td><span class="badge medium">Medium</span></td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td><strong>Normalisation across operating conditions</strong></td>
+    <td>Sensors behave differently under different operating regimes; normalise within each regime</td>
+    <td><span class="badge easy">Easy–Med</span></td>
+  </tr>
+  <tr>
+    <td>5</td>
+    <td><strong>Train/test split by engine unit</strong></td>
+    <td>Split by engine ID (not by row) to prevent data leakage</td>
+    <td><span class="badge easy">Easy</span></td>
+  </tr>
+</table>
+
+<h3>Model Building (5 tasks)</h3>
+
+<table>
+  <tr>
+    <th style="width: 5%;">#</th>
+    <th style="width: 22%;">Task</th>
+    <th>What we need to do</th>
+    <th style="width: 14%;">Difficulty</th>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td><strong>Regression model for RUL</strong></td>
+    <td>Predict remaining useful life as a continuous value (e.g., Random Forest, Linear Regression)</td>
+    <td><span class="badge medium">Medium</span></td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td><strong>Classification model for failure horizon</strong></td>
+    <td>Binary classification: will this engine fail within N cycles?</td>
+    <td><span class="badge medium">Medium</span></td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td><strong>Sequence model (optional)</strong></td>
+    <td>LSTM or similar for time-series — bonus points but not required</td>
+    <td><span class="badge hard">Hard</span></td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td><strong>Sensor importance analysis</strong></td>
+    <td>SHAP values or feature importance to identify which sensors matter most</td>
+    <td><span class="badge easy">Easy–Med</span></td>
+  </tr>
+  <tr>
+    <td>5</td>
+    <td><strong>Alarm threshold analysis</strong></td>
+    <td>At what predicted RUL should we trigger a maintenance alert? Cost-benefit analysis</td>
+    <td><span class="badge medium">Medium</span></td>
+  </tr>
+</table>
+
+<!-- ════════════════════════════════════════ -->
+<h2>7. Collaboration Setup</h2>
+
+<h3>GitHub Repository</h3>
+
+<p>We'll use a GitHub repo for version control. Here's how to get started:</p>
+
+<p><strong>1. Clone the repo</strong> (after you've been added as a collaborator):</p>
+<pre><code>git clone https://github.com/&lt;username&gt;/stat1100-project04.git
+cd stat1100-project04</code></pre>
+
+<p><strong>2. Create a branch for your work:</strong></p>
+<pre><code>git checkout -b aedrian/report-draft</code></pre>
+
+<p><strong>3. Commit and push:</strong></p>
+<pre><code>git add .
+git commit -m "Add report section on windowing strategy"
+git push origin aedrian/report-draft</code></pre>
+
+<p><strong>4. Create a Pull Request</strong> on GitHub to merge your branch into <code>main</code>.</p>
+
+<div class="note">
+  Don't worry if this is new — Week 11 covers Git in detail, and we can walk through it together before that.
+</div>
+
+<h3>Google Colab</h3>
+
+<p>This is where we'll run our Python notebooks. No installation needed — just a Google account.</p>
+
+<ol>
+  <li>Go to <a href="https://colab.research.google.com">colab.research.google.com</a></li>
+  <li>File → Open notebook → GitHub tab → paste our repo URL</li>
+  <li>Edit and run cells in your browser</li>
+  <li>File → Save a copy in GitHub → commit changes back to the repo</li>
+</ol>
+
+<h3>Google Slides</h3>
+
+<p>For the presentation. We'll create a shared slide deck closer to Mar 26.</p>
+
+<h3>Repository Structure</h3>
+
+<div class="tree">
+stat1100-project04/<br>
+├── README.md &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">← this plan</span><br>
+├── data/<br>
+│ &nbsp;&nbsp;└── CMAPSSData/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">← raw dataset files</span><br>
+├── notebooks/<br>
+│ &nbsp;&nbsp;├── 01-eda.ipynb &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">← exploratory data analysis</span><br>
+│ &nbsp;&nbsp;├── 02-data-prep.ipynb &nbsp;<span class="comment">← all 5 data preparation tasks</span><br>
+│ &nbsp;&nbsp;└── 03-modeling.ipynb &nbsp;&nbsp;<span class="comment">← all 5 model building tasks</span><br>
+├── report/<br>
+│ &nbsp;&nbsp;└── report.md &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">← written report (or Google Docs link)</span><br>
+└── presentation/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;└── slides-link.md &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">← link to Google Slides</span>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2>8. Getting Started — Day 1 Checklist</h2>
+
+<div class="checklist">
+  <ul>
+    <li>Both: Accept GitHub repo invite</li>
+    <li>Both: Open the repo in Google Colab, verify it runs</li>
+    <li>Both: Download CMAPSS dataset and upload to <code>data/</code></li>
+    <li>Both: Run <code>01-eda.ipynb</code> together — look at the data, discuss first impressions</li>
+    <li>Decide: Which work approach (A / B / C / hybrid) do we want?</li>
+    <li>Decide: Who takes which tasks for Day 2?</li>
+  </ul>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2>9. Assessment Criteria</h2>
+
+<p>From the project specification — keep these in mind throughout:</p>
+
+<table>
+  <tr>
+    <th style="width: 5%;">#</th>
+    <th style="width: 28%;">Criterion</th>
+    <th>What it means for us</th>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td><strong>Data Preparation Quality</strong></td>
+    <td>Correctness of each step; justify every decision; evidence that the pipeline prevents data leakage</td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td><strong>Model Building Rigour</strong></td>
+    <td>Appropriate algorithm selection; proper train/val/test discipline; hyperparameter tuning; business-suited metrics</td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td><strong>Interpretability &amp; Explainability</strong></td>
+    <td>SHAP values or feature importance; connect model outputs to business-facing insights</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td><strong>Evaluation Depth</strong></td>
+    <td>Go beyond a single accuracy metric; include cost-sensitive, fairness, or calibration analysis where appropriate</td>
+  </tr>
+  <tr>
+    <td>5</td>
+    <td><strong>Communication Quality</strong></td>
+    <td>Clear written report; reproducible notebook; non-technical presentation for stakeholders</td>
+  </tr>
+</table>
+
+<!-- ════════════════════════════════════════ -->
+
+<div class="footer">
+  Let's build something good. Questions, ideas, or concerns — drop them in the chat anytime.
+</div>
+
+</body>
+</html>
