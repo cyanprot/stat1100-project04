@@ -12,7 +12,7 @@
 
 Unplanned equipment failure is among the most expensive disruptions in manufacturing. A single turbofan engine failure can cost upwards of $50,000 in emergency repairs and lost production, and traditional scheduled maintenance -- replacing parts at fixed intervals regardless of condition -- wastes resources on healthy equipment while still missing unexpected breakdowns. This project develops a data-driven predictive maintenance system that monitors engine sensor readings in real time and triggers maintenance alerts only when degradation patterns indicate impending failure.
 
-Using the NASA CMAPSS FD001 dataset, which contains run-to-failure sensor trajectories for 100 simulated turbofan engines, we built an end-to-end pipeline spanning data ingestion, feature engineering, regression modeling, binary classification, and cost-optimized alarm threshold selection. Our Random Forest regressor predicts Remaining Useful Life (RUL) with an RMSE of approximately 18 cycles on the validation set, significantly outperforming the Linear Regression baseline (RMSE around 24). A KNN classifier provides a binary "maintenance needed" alert for engines within 30 cycles of failure, achieving an F1 score of approximately 0.78. Monte Carlo simulation of a 100-engine fleet estimates annual maintenance cost savings of roughly 40--55% compared to blanket scheduled maintenance.
+Using the NASA CMAPSS FD001 dataset, which contains run-to-failure sensor trajectories for 100 simulated turbofan engines, we built an end-to-end pipeline spanning data ingestion, feature engineering, regression modeling, binary classification, and cost-optimized alarm threshold selection. Our Random Forest regressor predicts Remaining Useful Life (RUL) with a validation RMSE of 17.40 cycles, outperforming the Linear Regression baseline (RMSE 21.00). On the held-out test set, the Random Forest achieved RMSE 18.72 and R² 0.79. A KNN classifier (K=19) provides a binary "maintenance needed" alert for engines within 30 cycles of failure, achieving a validation F1 score of 0.89 for the critical class. Monte Carlo simulation of a 100-engine fleet estimates annual maintenance cost savings of 72.3% compared to blanket scheduled maintenance.
 
 The project integrates techniques from nine weeks of the STAT 1100 curriculum: data wrangling (Week 3), exploratory data analysis (Week 5), KNN classification (Week 6), linear regression (Week 7), PCA and factor analysis (Week 8), K-Means clustering (Week 9), deployment considerations (Week 10), CI/CD validation practices (Week 11), and a conceptual discussion of deep learning (Week 12). Every modeling and preprocessing decision is documented with explicit justification, alternative approaches considered, and business impact assessment.
 
@@ -141,14 +141,18 @@ This same principle was applied during cross-validation: we used `GroupKFold` fo
 
 **Results:**
 
-| Model | Validation RMSE | Validation MAE | Validation R-squared |
-|-------|----------------|----------------|---------------------|
-| Linear Regression | ~24.1 | ~18.7 | ~0.58 |
-| Random Forest | ~17.9 | ~13.2 | ~0.77 |
+| Model | Validation RMSE | Validation MAE | Validation R² |
+|-------|----------------|----------------|---------------|
+| Linear Regression | 21.00 | 16.84 | 0.77 |
+| Random Forest | 17.40 | 12.41 | 0.84 |
 
-The Random Forest improved validation RMSE by approximately 26% over the Linear Regression baseline, confirming that non-linear sensor-degradation relationships exist and are captured by the ensemble approach. The best hyperparameters identified by grid search were `n_estimators=200`, `max_depth=20`, and `min_samples_leaf=2`.
+| Model | Test RMSE | Test MAE | Test R² |
+|-------|----------|---------|---------|
+| Random Forest | 18.72 | 13.21 | 0.79 |
 
-**Why Linear Regression first:** It establishes a performance floor and is the primary regression algorithm taught in Week 7. If a more complex model cannot significantly outperform this simple baseline, the added complexity is not justified. In our case, the Random Forest's 26% improvement in RMSE demonstrates clear value.
+The Random Forest improved validation RMSE by 17.1% over the Linear Regression baseline, confirming that non-linear sensor-degradation relationships exist and are captured by the ensemble approach. The best hyperparameters identified by grid search were `n_estimators=200`, `max_depth=10`, and `min_samples_leaf=5`.
+
+**Why Linear Regression first:** It establishes a performance floor and is the primary regression algorithm taught in Week 7. If a more complex model cannot significantly outperform this simple baseline, the added complexity is not justified. In our case, the Random Forest's 17% improvement in RMSE demonstrates clear value.
 
 **Why Random Forest:** Random Forest is an ensemble of decision trees that captures non-linear relationships and feature interactions without explicit feature engineering for non-linearity. While not the primary focus of any single lecture, it is mentioned in the Week 6 slides as a classification and regression algorithm and is a natural extension of the decision tree concept. Each tree in the forest learns from a bootstrap sample and a random subset of features, reducing overfitting through decorrelation -- a principle we applied rigorously with GroupKFold cross-validation.
 
@@ -170,15 +174,15 @@ The Random Forest improved validation RMSE by approximately 26% over the Linear 
 
 | Metric | Validation | Test |
 |--------|-----------|------|
-| Best K | 7 | -- |
-| F1 Score | ~0.78 | ~0.74 |
-| Precision | ~0.81 | ~0.77 |
-| Recall | ~0.75 | ~0.71 |
-| ROC-AUC | ~0.93 | ~0.90 |
+| Best K | 19 | -- |
+| F1 Score (Critical) | 0.89 | 0.76 |
+| Precision (Critical) | 0.92 | 0.94 |
+| Recall (Critical) | 0.86 | 0.64 |
+| Accuracy | 0.97 | 0.90 |
 
-**Business interpretation:** In predictive maintenance, the asymmetry of error costs is extreme. A false negative -- failing to alert on an engine that is about to fail -- results in an unplanned failure costing $50,000 (emergency repair, production halt, potential safety incident). A false positive -- alerting on an engine that has more life remaining -- results in a $5,000 unnecessary but harmless maintenance event. This 10:1 cost asymmetry means we should err on the side of caution, prioritizing recall (catching all true failures) even at the expense of some precision (extra false alarms). Our model's recall of approximately 0.75 means roughly 25% of true failures would be missed; the alarm threshold analysis in Section 4.5 addresses this gap by optimizing the decision boundary.
+**Business interpretation:** In predictive maintenance, the asymmetry of error costs is extreme. A false negative -- failing to alert on an engine that is about to fail -- results in an unplanned failure costing $50,000 (emergency repair, production halt, potential safety incident). A false positive -- alerting on an engine that has more life remaining -- results in a $5,000 unnecessary but harmless maintenance event. This 10:1 cost asymmetry means we should err on the side of caution, prioritizing recall (catching all true failures) even at the expense of some precision (extra false alarms). On validation data, our model's recall of 0.86 means approximately 14% of true failures would be missed (84 out of 620 critical instances); the alarm threshold analysis in Section 4.5 addresses this gap by optimizing the decision boundary. The drop to 0.64 recall on the test set (which contains only 25 critical engines) highlights the challenge of generalizing to new, unseen engines.
 
-**Why KNN:** KNN is the primary classification algorithm taught in Week 6 and practiced extensively in the KNN lab. It is a distance-based classifier that naturally benefits from our normalized feature space and can capture non-linear decision boundaries without parametric assumptions. The optimal K=7 provides a balance between bias (high K, smooth boundaries) and variance (low K, noisy boundaries).
+**Why KNN:** KNN is the primary classification algorithm taught in Week 6 and practiced extensively in the KNN lab. It is a distance-based classifier that naturally benefits from our normalized feature space and can capture non-linear decision boundaries without parametric assumptions. The optimal K=19 provides a balance between bias (high K, smooth boundaries) and variance (low K, noisy boundaries), with GridSearchCV selecting a relatively high K value that reduces sensitivity to noise in the 42-dimensional feature space.
 
 **Alternatives considered:**
 
@@ -212,10 +216,10 @@ The Random Forest improved validation RMSE by approximately 26% over the Linear 
 
 **Key findings:**
 
-- **Consensus features** appearing in the top 10 of all three methods included rolling mean statistics for sensors 4, 7, 11, 12, and 15, as well as the raw values for sensors 2, 3, and 14. These sensors measure temperatures, pressures, and corrected fan speed at critical engine stations -- physically meaningful degradation indicators.
-- **Rolling mean features consistently ranked higher** than their corresponding raw sensor values across all three methods, validating our feature engineering approach. The temporal trend (captured by rolling mean) is more predictive than any single instantaneous reading.
-- **Rolling standard deviation features** appeared in the top 20 but not consistently in the top 10, suggesting that degradation instability is a secondary signal compared to the smoothed trend direction.
-- **PCA loadings** revealed that the first principal component (capturing approximately 40% of variance) loaded most heavily on temperature-related sensors, while the second component (approximately 20% of variance) emphasized pressure ratios. This aligns with the physical degradation mechanism: HPC degradation manifests first as temperature increases, then as pressure ratio decreases.
+- **Consensus features** appearing in the top 10 of all three methods were the rolling means of sensors 4 (T24, total temperature at LPC outlet), 7 (T50, total temperature at LPT outlet), and 11 (Ps30, static pressure at HPC outlet). These sensors measure temperatures and pressures at critical engine stations -- physically meaningful degradation indicators.
+- **Rolling mean features consistently ranked higher** than their corresponding raw sensor values across all three methods, validating our feature engineering approach. The top PCA-weighted features were sensor_13_rmean, sensor_8_rmean, sensor_12_rmean, and sensor_7_rmean, all rolling statistics. The temporal trend is more predictive than any single instantaneous reading.
+- **Rolling standard deviation features** appeared in the rankings but not consistently in the top 10, suggesting that degradation instability is a secondary signal compared to the smoothed trend direction.
+- **PCA loadings** revealed that the top 5 principal components captured 66.0% of variance. In the EDA-level PCA (15 raw sensors), PC1 captured 60.2% of variance, loading most heavily on temperature-related sensors, while PC2 (14.0%) emphasized pressure ratios. This aligns with the physical degradation mechanism: HPC degradation manifests first as temperature increases, then as pressure ratio decreases.
 
 **Business implication:** Maintenance teams should prioritize continuous monitoring of the consensus sensor group. Installing redundant instrumentation or higher-frequency sampling on these specific sensors would capture the majority of the predictive signal. Conversely, the 7 constant sensors (1, 5, 6, 10, 16, 18, 19) and the low-importance sensors provide minimal value for predictive maintenance and could be deprioritized in monitoring dashboards.
 
@@ -235,17 +239,17 @@ The Random Forest improved validation RMSE by approximately 26% over the Linear 
 | Planned maintenance (true positive) | $5,000 | Scheduled replacement during planned downtime |
 | False alarm (false positive) | $5,000 | Unnecessary but harmless maintenance event |
 
-**Deterministic cost sweep:** We evaluated the Random Forest's validation predictions at each threshold. For each threshold T, an alarm is triggered when the predicted RUL falls below T cycles. We then counted the resulting true positives, false positives, and false negatives, and computed the total cost. The optimal threshold was approximately 25--30 cycles, where the cost curve reaches its minimum. Below this threshold, missed failures (false negatives) drive costs up due to the $50,000 penalty; above it, excessive false alarms accumulate unnecessary $5,000 charges.
+**Deterministic cost sweep:** We evaluated the Random Forest's validation predictions at each threshold. For each threshold T, an alarm is triggered when the predicted RUL falls below T cycles. We then counted the resulting true positives, false positives, and false negatives, and computed the total cost. The optimal threshold was **10 cycles**, where the cost curve reaches its minimum at $3,405,000 total (170 true positives caught, 50 false negatives missed, 11 false positives). The low optimal threshold reflects the 10:1 cost asymmetry: it is more cost-effective to trigger maintenance alerts late (when prediction confidence is highest) than to cast a wide net with many false alarms.
 
 **Monte Carlo simulation:** The deterministic sweep uses fixed validation data and a single point estimate. To capture uncertainty -- which engines happen to be in the fleet, where each engine is in its lifecycle, and how accurate our predictions are on any given day -- we ran 1,000 Monte Carlo simulations. Each simulation randomly sampled 100 engines from the validation set's RUL distribution, added Gaussian prediction noise calibrated to our model's RMSE, applied the optimal alarm threshold, and computed total fleet maintenance cost. Results:
 
-- **Mean annual cost:** approximately $175,000
-- **Median annual cost:** approximately $165,000
-- **95% confidence interval:** approximately [$90,000, $310,000]
+- **Mean annual cost:** $138,500
+- **Median annual cost:** $130,000
+- **95% confidence interval:** [$25,000, $310,125]
 - **Scheduled maintenance baseline:** $500,000/year (100 engines x $5,000 each)
-- **Estimated savings:** approximately $325,000/year (roughly 65% reduction)
+- **Estimated savings:** $361,500/year (72.3% reduction)
 
-The wide confidence interval reflects the inherent uncertainty in fleet composition and prediction accuracy. The lower bound ($90,000) represents a favorable scenario where most engines are healthy and predictions are accurate; the upper bound ($310,000) represents a scenario with multiple simultaneous failures and higher prediction error.
+The wide confidence interval reflects the inherent uncertainty in fleet composition and prediction accuracy. The lower bound ($25,000) represents a favorable scenario where most engines are healthy and predictions are accurate; the upper bound ($310,125) represents a scenario with multiple simultaneous failures and higher prediction error.
 
 **Course reference:** Week 6 -- Classification (precision-recall curve, threshold tuning; directly from the KNN notebook's Task 2 on threshold optimization).
 
@@ -255,7 +259,7 @@ The wide confidence interval reflects the inherent uncertainty in fleet composit
 
 ### 5.1 PCA Dimensionality Reduction (Week 8)
 
-We applied PCA to the 42-feature space (14 raw sensors + 28 rolling statistics) after standardization with `StandardScaler`. Approximately 7 principal components captured 95% of the total variance, confirming significant redundancy among the sensor readings. This is expected: many sensors in a turbofan engine measure correlated thermodynamic quantities (e.g., temperatures at adjacent turbine stages are physically coupled through energy conservation). The PCA-reduced representation was computed for use in clustering analysis and as a diagnostic tool for understanding the feature space structure.
+We applied PCA to the 42-feature space (14 raw sensors + 28 rolling statistics) after standardization with `StandardScaler`. 21 principal components were needed to capture 95% of the total variance, with the first component alone accounting for 47.3% -- confirming significant redundancy among the sensor readings. This is expected: many sensors in a turbofan engine measure correlated thermodynamic quantities (e.g., temperatures at adjacent turbine stages are physically coupled through energy conservation). The PCA-reduced representation was computed for use in clustering analysis and as a diagnostic tool for understanding the feature space structure.
 
 **Course reference:** Week 8 -- PCA and Factor Analysis (StandardScaler before PCA, scree plot, cumulative variance threshold).
 
@@ -263,9 +267,9 @@ We applied PCA to the 42-feature space (14 raw sensors + 28 rolling statistics) 
 
 We applied K-Means clustering to sensor data in the PCA-reduced space. Using the elbow method and silhouette analysis, three clusters emerged as the optimal partition:
 
-- **Cluster 0 (Healthy):** High mean RUL, sensor readings near baseline values. These engine time steps correspond to the early and mid-life operational phase where no degradation is detectable.
-- **Cluster 1 (Degrading):** Medium mean RUL, sensor readings beginning to diverge from baseline. This cluster captures the transition phase where degradation has started but has not yet reached critical levels.
-- **Cluster 2 (Critical):** Low mean RUL, sensor readings significantly deviated from baseline. These time steps correspond to the final phase before failure.
+- **Cluster 0 (Critical):** 3,902 samples, mean RUL = 21.9, median RUL = 19.0. Sensor readings significantly deviated from baseline. These time steps correspond to the final phase before failure.
+- **Cluster 1 (Degrading):** 9,297 samples, mean RUL = 105.7, median RUL = 96.0. Sensor readings beginning to diverge from baseline. This cluster captures the transition phase where degradation has started but has not yet reached critical levels.
+- **Cluster 2 (Healthy):** 7,432 samples, mean RUL = 155.6, median RUL = 149.0. Sensor readings near baseline values. These engine time steps correspond to the early and mid-life operational phase where no degradation is detectable.
 
 When we colored the PCA scatter plot by K-Means cluster assignment and then by actual RUL, the patterns aligned closely: the unsupervised clusters tracked the supervised RUL gradient. This correspondence validates our modeling approach from an independent angle -- the degradation stages are real structure in the data, not artifacts of our labeling scheme.
 
@@ -279,11 +283,11 @@ When we colored the PCA scatter plot by K-Means cluster assignment and then by a
 
 1. **Deploy the predictive model** to monitor the engine fleet in real time. The Random Forest regressor provides continuous RUL estimates, and the KNN classifier provides binary maintenance alerts, giving operations teams both a nuanced view and a clear action signal.
 
-2. **Set the maintenance alert threshold at approximately 25--30 predicted RUL cycles.** This threshold minimizes total expected maintenance cost by balancing the risk of missed failures against the cost of unnecessary maintenance events. The exact threshold should be calibrated to site-specific cost parameters.
+2. **Set the maintenance alert threshold at 10 predicted RUL cycles.** This threshold minimizes total expected maintenance cost given the 10:1 cost asymmetry ($50K unplanned vs $5K planned). The exact threshold should be calibrated to site-specific cost parameters.
 
-3. **Prioritize monitoring of sensors 4, 7, 11, 12, and 15** (and their rolling statistics). These sensors carry the strongest predictive signal according to all three importance methods (PCA loadings, RF importance, permutation importance). Enhanced monitoring -- higher sampling rates, redundant instrumentation, or tighter out-of-range alerting -- on these sensors would capture the majority of the degradation signal.
+3. **Prioritize monitoring of sensors 4, 7, and 11** (and their rolling means). These sensors were the consensus top features across all three importance methods (PCA loadings, RF importance, permutation importance). Enhanced monitoring -- higher sampling rates, redundant instrumentation, or tighter out-of-range alerting -- on these sensors would capture the majority of the degradation signal.
 
-4. **Expected savings: approximately $325,000 per year** for a 100-engine fleet compared to blanket scheduled maintenance, with a 95% confidence interval of $190,000 to $410,000 in savings. Even at the pessimistic end of the confidence interval, predictive maintenance substantially outperforms the scheduled approach.
+4. **Expected savings: $361,500 per year** for a 100-engine fleet compared to blanket scheduled maintenance (72.3% reduction), with a 95% confidence interval of [$189,875, $475,000] in savings. Even at the pessimistic end of the confidence interval, predictive maintenance substantially outperforms the scheduled approach.
 
 ### Limitations
 
