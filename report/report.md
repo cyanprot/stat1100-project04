@@ -1,7 +1,7 @@
 # Predictive Maintenance for Industrial Equipment
 ## STAT 1100 Group Project Report
 
-**Team:** Jongmin Lee & Aedrian
+**Team:** Jongmin Lee & Aedrian Formento
 **Course:** STAT 1100 -- Introduction to Data Science, Langara College, Spring 2026
 **Instructor:** Vincent Yeung
 **Date:** March 2026

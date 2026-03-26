@@ -1,75 +1,76 @@
-# Project Proposal: Predictive Maintenance for Industrial Equipment
+# Predictive Maintenance for Industrial Equipment
 
-**Course:** STAT 1100 — Introduction to Data Science
-**Instructor:** Vincent Yeung
-**Team Members:** Jongmin, Aedrian
-**Date:** March 14, 2026
+**STAT 1100 — Introduction to Data Science | Langara College | Spring 2026**
 
----
-
-## 1. Problem Statement
-
-Manufacturing companies face significant financial losses from unplanned equipment failures. Traditional scheduled maintenance strategies — replacing parts at fixed intervals regardless of condition — lead to either premature replacements (wasting resources) or unexpected breakdowns (halting production). This project applies data science techniques to predict when equipment will fail, enabling a shift from scheduled maintenance to **condition-based intervention**.
-
-## 2. Dataset
-
-We will use the **NASA Turbofan Engine Degradation Simulation Dataset (CMAPSS)**, specifically the FD001 subset:
-
-- **Source:** NASA Prognostics Data Repository / Kaggle
-- **Size:** 20,631 training observations across 100 engine units
-- **Features:** 21 sensor measurements + 3 operational settings per time cycle
-- **Target:** Remaining Useful Life (RUL) — the number of operational cycles before engine failure
-- **Structure:** Time-series data where each engine runs from a healthy state to failure
-
-We selected CMAPSS over simpler alternatives (e.g., AI4I 2020) because its time-series structure maps naturally to all 10 required project tasks, including time-series windowing, RUL label construction, and normalization across operating conditions.
-
-## 3. Proposed Approach
-
-Our approach applies techniques directly from STAT 1100 lectures:
-
-### Data Preparation
-1. **Time-series windowing** (Week 3, 7): Extract temporal patterns using rolling statistics
-2. **Sensor feature engineering** (Week 5): Create rolling mean, standard deviation, and trend features
-3. **RUL label construction** (Week 3): Design piecewise-linear labels with a cap at 130 cycles
-4. **Normalization** (Week 6): Apply MinMaxScaler to sensor readings, fitted on training data only
-5. **Train/test split** (Week 6): Group-based split by engine unit to prevent data leakage
-
-### Model Building
-1. **RUL Regression** (Week 7): Linear Regression baseline, with Random Forest as an extension
-2. **Failure Classification** (Week 6): KNN classifier to predict failure within 30 cycles
-3. **Sequence Model Discussion** (Week 12): Analysis of deep learning applicability
-4. **Sensor Importance** (Week 8): PCA loadings and feature importance analysis
-5. **Alarm Threshold** (Week 6): Cost-benefit analysis for maintenance scheduling decisions
-
-### Additional Analysis
-- **PCA dimensionality reduction** (Week 8) on the 21-sensor feature space
-- **K-Means clustering** (Week 9) to identify engine degradation stages
-- **Monte Carlo simulation** for robust cost estimation under uncertainty
-
-## 4. Timeline
-
-| Period | Milestone |
-|--------|-----------|
-| Mar 14–17 | Data preparation: download, EDA, preprocessing pipeline |
-| Mar 17–19 | Model building: regression, classification, evaluation |
-| Mar 19–21 | Report writing, documentation, code review |
-| Mar 22–25 | Midterm break |
-| Mar 26–30 | Presentation preparation |
-| Mar 31 | Project presentation |
-
-## 5. Expected Deliverables
-
-1. **Jupyter Notebooks** (50%): Three reproducible notebooks covering EDA, data preparation, and model building
-2. **Written Report** (30%): Technical report documenting all 10 tasks with justifications and business context
-3. **Presentation** (20%): Non-technical presentation translating findings into maintenance recommendations for plant management
-
-## 6. Tools and Technologies
-
-- **Language:** Python 3.12
-- **Libraries:** scikit-learn, pandas, NumPy, matplotlib, seaborn
-- **Environment:** Google Colab (shared), local Python with Jupyter
-- **Version Control:** GitHub ([repository link](https://github.com/cyanprot/stat1100-project04))
+Aedrian Formento & Jongmin Lee | Instructor: Vincent Yeung
 
 ---
 
-*We look forward to applying the data science techniques learned in STAT 1100 to this real-world predictive maintenance challenge.*
+## Overview
+
+Data-driven predictive maintenance system using the NASA CMAPSS turbofan engine dataset. Predicts Remaining Useful Life (RUL) and triggers cost-optimized maintenance alerts based on sensor degradation patterns.
+
+**Key Results:**
+- Random Forest RUL regression: **RMSE 17.40** (val), **18.72** (test), R² 0.79
+- KNN failure classification (K=19): **F1 0.89** (val), threshold-optimized
+- Monte Carlo cost simulation: **72.3% savings** vs scheduled maintenance ($361,500/year for 100-engine fleet)
+
+## Repository Structure
+
+```
+├── notebooks/
+│   ├── 01-eda.ipynb              ← Exploratory Data Analysis + PCA + K-Means
+│   ├── 02-data-prep.ipynb        ← 5 data preparation tasks + pipeline
+│   └── 03-modeling.ipynb         ← 5 model tasks + SHAP + Monte Carlo
+├── report/
+│   └── report.md                 ← Full written report (30% of grade)
+├── proposal/
+│   └── proposal.md               ← Project proposal (5% of grade)
+├── presentation/
+│   ├── presentation.html         ← 11-slide presentation (16:9)
+│   └── presentation.pdf          ← PDF export
+├── docs/
+│   ├── adrs/                     ← 7 Architecture Decision Records
+│   ├── course-alignment.md       ← Lecture-to-task mapping
+│   └── work-logs/                ← Per-phase execution logs
+├── data/
+│   ├── CMAPSSData/               ← Raw NASA dataset (gitignored)
+│   └── processed/                ← Preprocessed CSVs + feature info
+└── .gitignore
+```
+
+## Dataset
+
+[NASA CMAPSS FD001](https://data.nasa.gov/) — 100 turbofan engines, 21 sensors, run-to-failure time series.
+
+## Techniques Used (STAT 1100 Curriculum)
+
+| Week | Topic | Application |
+|------|-------|-------------|
+| 3 | Data Wrangling | RUL label construction, piecewise-linear cap at 130 |
+| 5 | EDA | Sensor behavior, constant sensor detection, correlation |
+| 6 | Classification | KNN (K=19), confusion matrix, F1, threshold optimization |
+| 7 | Regression | Linear Regression baseline, Random Forest, RMSE/MAE/R² |
+| 8 | PCA | Dimensionality reduction, sensor importance via loadings |
+| 9 | K-Means | Engine degradation stage clustering (3 clusters) |
+| 11 | CI/CD | GitHub, assert-based validation gates |
+| 12 | Deep Learning | LSTM discussion (not implemented — justified in ADR-007) |
+
+## How to Run
+
+```bash
+# Clone and set up
+git clone https://github.com/cyanprot/stat1100-project04.git
+cd stat1100-project04
+python3 -m venv .venv && source .venv/bin/activate
+pip install pandas numpy scikit-learn matplotlib seaborn shap jupyterlab
+
+# Run notebooks in order
+jupyter lab notebooks/
+```
+
+Or open directly in [Google Colab](https://colab.research.google.com/) — each notebook downloads the dataset automatically.
+
+## License
+
+MIT License
