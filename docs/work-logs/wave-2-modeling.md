@@ -37,9 +37,21 @@
 - RF Regression: RMSE 18.72, MAE 13.21, R² 0.79
 - KNN Classification: Critical F1=0.76, recall=0.64, accuracy=0.90
 
+### SHAP Explainability (added 2026-03-14)
+- SHAP TreeExplainer on RF regressor, 500 validation samples
+- Top feature: sensor_4_rmean (mean |SHAP| = 25.51), 2x the runner-up
+- Top 5: sensor_4_rmean (25.51), sensor_9_rmean (11.75), sensor_11_rmean (9.92), sensor_21_rmean (9.66), sensor_14_rmean (4.38)
+- Beeswarm + bar plots generated
+
+### Calibration Analysis (added 2026-03-14)
+- KNN Brier score: raw 0.0245, calibrated (Platt) 0.0227, 7.1% improvement
+- Calibration curves plotted for raw vs Platt-scaled probabilities
+
 ## Key Outputs
-- Output notebook: 866KB (plots embedded)
+- Output notebook: 1.2MB (SHAP + calibration plots embedded)
 - All assert validation cells passed
+- SHAP/calibration images: data/processed/shap_summary.png, calibration_curves.png
 
 ## Issues
-- None. All models trained and validated successfully.
+- Initial execution failed: injected cells used `data/processed/` instead of `../data/processed/` (kernel CWD = notebooks/). Fixed paths + re-executed.
+- feature_info.json key was `feature_cols` not `feature_columns`. Fixed.

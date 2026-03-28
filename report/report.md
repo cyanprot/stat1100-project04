@@ -227,6 +227,46 @@ The Random Forest improved validation RMSE by 17.1% over the Linear Regression b
 
 **Course reference:** Week 8 -- PCA and Factor Analysis (component loadings, explained variance interpretation); Week 7 -- Regression (coefficient interpretation as feature importance).
 
+### 4.4b SHAP Explainability Analysis
+
+**What we did:** We applied SHAP (SHapley Additive exPlanations) using TreeExplainer on the Random Forest regressor. SHAP provides game-theoretic feature attributions -- for each individual prediction, it decomposes the output into additive contributions from each feature, satisfying the mathematical properties of consistency and local accuracy that simpler importance metrics lack.
+
+**Key findings:**
+
+| Rank | Feature | Mean |SHAP Value| | Physical Meaning |
+|------|---------|---------------------|------------------|
+| 1 | sensor_4_rmean | 25.51 | LPC outlet temperature (T24) rolling mean |
+| 2 | sensor_9_rmean | 11.75 | HPC outlet temperature rolling mean |
+| 3 | sensor_11_rmean | 9.92 | HPC outlet static pressure (Ps30) rolling mean |
+| 4 | sensor_21_rmean | 9.66 | Bleed enthalpy rolling mean |
+| 5 | sensor_14_rmean | 4.38 | Fan/booster inlet total temperature rolling mean |
+
+- **sensor_4_rmean dominated** with a mean |SHAP| of 25.51 -- more than double the next most important feature (sensor_9_rmean at 11.75). This confirms that LPC outlet temperature is the single most informative degradation indicator, consistent with the HPC degradation fault mode in FD001.
+- SHAP confirmed the consensus ranking from the three traditional methods, with all top 5 features being rolling means of temperature and pressure sensors.
+- Unlike global importance metrics, SHAP revealed *directional* effects: higher rolling mean values for temperature sensors (4, 9) push RUL predictions *lower* (indicating degradation), while stable pressure readings push predictions *higher* (indicating health).
+- The SHAP beeswarm plot shows clear separation between healthy-state features (blue dots, high SHAP value = high RUL) and degradation-state features (red dots, negative SHAP value = low RUL), providing maintenance engineers with an intuitive visual explanation of each prediction.
+
+**Why SHAP in addition to traditional methods:** The assessment rubric explicitly calls for "SHAP values, feature importance, or equivalent tools to connect model outputs to business-facing insights." While our three traditional methods establish the global ranking, SHAP provides the local, per-prediction explanations that maintenance engineers need to trust and act on individual alerts. When the model flags engine #47 for maintenance, SHAP shows exactly which sensors are driving that specific alert.
+
+**Course reference:** Assessment Criteria #3 -- Interpretability & Explainability.
+
+### 4.5b Calibration Analysis
+
+**What we did:** We evaluated the calibration of the KNN classifier's predicted probabilities using calibration curves and Brier scores. We then applied Platt scaling (sigmoid calibration via `CalibratedClassifierCV`) to improve probability reliability.
+
+**Results:**
+
+| Model | Brier Score | Interpretation |
+|-------|------------|----------------|
+| Raw KNN (K=19) | 0.0245 | Strong baseline calibration |
+| Calibrated KNN (Platt scaling) | 0.0227 | 7.1% improvement |
+
+Both Brier scores are well below 0.05 (where 0 = perfect calibration and 0.25 = random guessing), indicating that the KNN classifier's probability estimates are already reliable before calibration. Platt scaling via `CalibratedClassifierCV` with 5-fold cross-validation provided a modest 7.1% improvement, tightening the alignment between predicted probabilities and observed failure rates.
+
+**Why calibration matters:** In cost-sensitive threshold optimization (Section 4.5), we rely on the model's predicted probabilities to set alarm thresholds. If the model says "70% chance of failure within 30 cycles" but only 40% of such predictions are actually critical, the threshold will be miscalibrated and the cost model will produce incorrect savings estimates. The calibration curve visualization confirms that the KNN's probability bins track the diagonal (perfect calibration line) closely, with the calibrated version showing tighter adherence across all probability ranges.
+
+**Course reference:** Assessment Criteria #4 -- "evaluation goes beyond a single accuracy metric; includes cost-sensitive, fairness, or calibration analysis."
+
 ### 4.5 Alarm Threshold Analysis (Task 5)
 
 **What we did:** We conducted a two-stage cost optimization: (1) a deterministic cost sweep across alarm thresholds from 10 to 60 cycles, and (2) a Monte Carlo simulation with 1,000 iterations to estimate the distribution of annual maintenance costs for a 100-engine fleet.
