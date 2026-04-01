@@ -11,6 +11,7 @@ Aedrian Formento & Jongmin Lee | Instructor: Vincent Yeung
 Data-driven predictive maintenance system using the NASA CMAPSS turbofan engine dataset. Predicts Remaining Useful Life (RUL) and triggers cost-optimized maintenance alerts based on sensor degradation patterns.
 
 **Key Results:**
+
 - Random Forest RUL regression: **RMSE 17.40** (val), **18.72** (test), R² 0.79
 - KNN failure classification (K=19): **F1 0.89** (val), threshold-optimized
 - Monte Carlo cost simulation: **72.3% savings** vs scheduled maintenance ($361,500/year for 100-engine fleet)
@@ -27,15 +28,15 @@ Data-driven predictive maintenance system using the NASA CMAPSS turbofan engine 
 ├── proposal/
 │   └── proposal.md               ← Project proposal (5% of grade)
 ├── presentation/
-│   ├── presentation.html         ← 11-slide presentation (16:9)
-│   └── presentation.pdf          ← PDF export
+│   ├── ...Presentation...v2.pptx ← 11-slide presentation (16:9)
+│   └── ...QA...pdf               ← Q&A preparation document
 ├── docs/
 │   ├── adrs/                     ← 7 Architecture Decision Records
-│   ├── course-alignment.md       ← Lecture-to-task mapping
 │   └── work-logs/                ← Per-phase execution logs
 ├── data/
 │   ├── CMAPSSData/               ← Raw NASA dataset (gitignored)
 │   └── processed/                ← Preprocessed CSVs + feature info
+├── requirements.txt
 └── .gitignore
 ```
 
@@ -63,7 +64,7 @@ Data-driven predictive maintenance system using the NASA CMAPSS turbofan engine 
 git clone https://github.com/cyanprot/stat1100-project04.git
 cd stat1100-project04
 python3 -m venv .venv && source .venv/bin/activate
-pip install pandas numpy scikit-learn matplotlib seaborn shap jupyterlab
+pip install -r requirements.txt
 
 # Run notebooks in order
 jupyter lab notebooks/

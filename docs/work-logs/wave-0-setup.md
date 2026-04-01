@@ -4,9 +4,9 @@
 **Duration:** ~30 minutes
 
 ## What Was Done
-- Created project directory on northprot: `~/Academia/STAT1100/project/stat1100-project04`
+- Created project directory on development server: `~/Academia/STAT1100/project/stat1100-project04`
 - Cloned repo from `github.com/cyanprot/stat1100-project04`
-- Configured git (user: Cyan Prot, email: cyan@northprot.com)
+- Configured git (user: Jongmin Lee, email: cyan@northprot.com)
 - Created Python venv at `~/Academia/STAT1100/.venv`
 - Installed packages: pandas 3.0.1, numpy 2.4.3, scikit-learn 1.8.0, matplotlib 3.10, seaborn 0.13, jupyterlab, ipykernel
 - Registered Jupyter kernel: `stat1100`

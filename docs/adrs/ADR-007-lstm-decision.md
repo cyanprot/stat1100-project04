@@ -9,7 +9,7 @@ Four factors inform this decision:
 
 1. **Course coverage:** Week 12 covers "Basic Deep Learning Concept" as a conceptual overview. There is no hands-on deep learning notebook, no neural network coding exercise, and the lecture explicitly frames deep learning as an awareness topic, not an implementation skill.
 
-2. **Infrastructure:** The northprot server has an NVIDIA GPU accessible from the host, but nvidia-container-toolkit is not installed, so GPU acceleration is unavailable inside the Docker container where our Jupyter environment runs. CPU-only LSTM training on CMAPSS FD001 would take minutes (feasible) but introduces a dependency (TensorFlow/PyTorch) that complicates environment reproducibility.
+2. **Infrastructure:** The development server has an NVIDIA GPU accessible from the host, but nvidia-container-toolkit is not installed, so GPU acceleration is unavailable inside the Docker container where our Jupyter environment runs. CPU-only LSTM training on CMAPSS FD001 would take minutes (feasible) but introduces a dependency (TensorFlow/PyTorch) that complicates environment reproducibility.
 
 3. **Performance context:** Classical ML models (Linear Regression, Random Forest, KNN with rolling features) achieve RMSE 16-20 on FD001, which is competitive. LSTM's advantage is primarily on FD002-FD004 where multiple operating conditions create complex temporal patterns that benefit from learned sequence representations. On FD001 (single condition), the marginal gain is modest.
 
